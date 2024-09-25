@@ -7,12 +7,6 @@ import 'package:myfirstapplication/shoppingcart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:myfirstapplication/spladh.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:video_player/video_player.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter_android/google_maps_flutter_android.dart';
-import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 import 'package:marqueer/marqueer.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -37,46 +31,7 @@ class LocationHandler {
     bool serviceEnabled;
     LocationPermission permission;
 
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      // Location services are disabled. Please enable the services
-      return false;
-    }
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        // Location permissions are denied
-        return false;
-      }
-    }
-    if (permission == LocationPermission.deniedForever) {
-      // Location permissions are permanently denied, we cannot request permissions.
-      return false;
-    }
-    return true;
-  }
 
-  static Future<Position?> getCurrentPosition() async {
-    try {
-      final hasPermission = await handleLocationPermission();
-      if (!hasPermission) return null;
-      return await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-    } catch (e) {
-      return null;
-    }
-  }
-
-  static Future<String?> getAddressFromLatLng(Position position) async {
-    try {
-      List<Placemark> placeMarks =
-          await placemarkFromCoordinates(position.latitude, position.longitude);
-      Placemark place = placeMarks[0];
-      return "${place.street}, ${place.subLocality},${place.subAdministrativeArea}, ${place.postalCode}";
-    } catch (e) {
-      return null;
     }
   }
 }
@@ -100,11 +55,7 @@ class _HomepageState extends State<Homepage> {
   // Position? _currentPosition;
   late VideoPlayerController _controller;
 
-  @override
-  void initState() {
-    super.initState();
-    _loadEmail();
-    _getCurrentLocation();
+
   }
 
   Future<void> _loadEmail() async {
@@ -120,33 +71,9 @@ class _HomepageState extends State<Homepage> {
     super.dispose();
   }
 
-  Future<void> _getCurrentLocation() async {
-    LocationPermission permission = await Geolocator.requestPermission();
-    if (permission == LocationPermission.denied ||
-        permission == LocationPermission.deniedForever) {
-      setState(() {
-        _currentAddress = "Location permissions are denied";
-      });
-      return;
+  
     }
 
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-    List<Placemark> placemarks =
-        await placemarkFromCoordinates(position.latitude, position.longitude);
-    setState(() {
-      if (placemarks.isNotEmpty) {
-        Placemark place = placemarks[0];
-        String completeAddress =
-            "${place.name}, ${place.street}, ${place.subLocality}, ${place.administrativeArea}, ${place.country}, ${place.postalCode}";
-        setState(() {
-          String completeAddress =
-              "${place.name}, ${place.street}, ${place.subLocality}, ${place.administrativeArea}, ${place.country}, ${place.postalCode}";
-          ;
-
-          _currentAddress = completeAddress;
-        });
-        print(completeAddress);
       }
     });
   }
